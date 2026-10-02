@@ -99,13 +99,13 @@ module ExportKit
       categories[key] = CategoryBuilder.new(key, version:, record_set_builder:, &definition).build
     end
 
-    def exclude(key, because:)
+    def exclude(key, reason:)
       key = normalize(key)
       raise ArgumentError, "Export category already registered: #{key}" if categories.key?(key)
 
       categories[key] = Category.new(
         category: key, version: 1, record_sets: [].freeze, omitted_tables: {}.freeze,
-        omission_reason: because
+        omission_reason: reason
       )
     end
 
@@ -143,8 +143,8 @@ module ExportKit
         record_sets << record_set_builder.new(name, model:, scope:, fields:, schema:, &definition).build
       end
 
-      def omit_table(table_name, because:)
-        omitted_tables[table_name.to_s] = because
+      def omit_table(table_name, reason:)
+        omitted_tables[table_name.to_s] = reason
       end
 
       def build

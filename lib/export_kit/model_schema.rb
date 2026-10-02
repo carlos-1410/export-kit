@@ -54,11 +54,11 @@ module ExportKit
         allow :created_at, :updated_at
       end
 
-      def omit(*columns, because:)
-        raise ArgumentError, "omission reason is required" if because.to_s.strip.empty?
+      def omit(*columns, reason:)
+        raise ArgumentError, "omission reason is required" if reason.to_s.strip.empty?
         raise ArgumentError, "omitted fields must be unique" if denied.keys.intersect?(columns.map(&:to_s))
 
-        columns.each { |column| denied[column.to_s] = because.to_s }
+        columns.each { |column| denied[column.to_s] = reason.to_s }
       end
 
       alias deny omit
