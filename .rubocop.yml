@@ -1,0 +1,15 @@
+inherit_from: ../../.rubocop.yml
+
+Rails:
+  Enabled: false
+
+Metrics/AbcSize:
+  Exclude:
+    - test/**/*
+
+Metrics/MethodLength:
+  Exclude:
+    - test/**/*
+
+Metrics/ParameterLists:
+  CountKeywordArgs: false
