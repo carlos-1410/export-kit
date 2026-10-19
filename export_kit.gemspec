@@ -12,7 +12,7 @@ Gem::Specification.new do |spec|
   spec.metadata["allowed_push_host"] = "https://publication-not-authorized.invalid"
   spec.metadata["rubygems_mfa_required"] = "true"
   spec.add_dependency "csv", ">= 3.3.6", "< 4"
-  spec.add_dependency "json", ">= 2.21.2", "< 3"
+  spec.add_dependency "json", ">= 2.21.2", "< 4"
   spec.add_dependency "prawn", "~> 2.5"
   spec.add_dependency "rubyzip", "~> 3.6"
 end
