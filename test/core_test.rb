@@ -7,9 +7,11 @@ require "open3"
 require "timeout"
 
 class CoreTest < Minitest::Test
+  def test_version_is_exposed
+    assert_equal "0.1.0", ExportKit::VERSION
+  end
+
   def test_nested_json_without_rails
-    refute defined?(Rails)
-    refute defined?(ActiveRecord)
     data = { "products" => [{ "name" => "Łódź", "price" => 12, "tags" => [nil, true] }] }
     artifact = ExportKit.render(data, format: :json, max_bytes: 4096).value!
     assert_equal data, JSON.parse(artifact.file.read)
@@ -82,7 +84,7 @@ class CoreTest < Minitest::Test
     assert File.binread(artifact.file.path).start_with?("%PDF-")
     assert artifact.verify.success?
     result = ExportKit.render({ title: "Label" }, format: :pdf, max_bytes: 5, renderer:,
-                              extension: "pdf", content_type: "application/pdf")
+                                                  extension: "pdf", content_type: "application/pdf")
     assert_equal ExportKit::Render::TOO_LARGE, result.error
   ensure
     artifact&.close!
@@ -97,7 +99,7 @@ class CoreTest < Minitest::Test
       end
       assert_raises(NoMethodError) do
         ExportKit.render(nil, format: :custom, renderer:, max_bytes: 100,
-                         extension: "txt", content_type: "text/plain")
+                              extension: "txt", content_type: "text/plain")
       end
       %w(json csv_zip pdf).each do |format|
         source = lambda do |&emit|

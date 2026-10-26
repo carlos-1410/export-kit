@@ -173,7 +173,7 @@ module ExportKit
     def expected_csv_files
       built.manifest.flat_map do |entry|
         entry.fetch("record_sets").filter_map do |record_set, count|
-          "data/#{entry.fetch("category")}/#{record_set}.csv" if count.positive?
+          "data/#{entry.fetch('category')}/#{record_set}.csv" if count.positive?
         end
       end
     end
@@ -236,7 +236,7 @@ module ExportKit
     end
 
     def expected_csv_file(entry, record_set, count)
-      "data/#{entry.fetch("category")}/#{record_set.name}.csv" if count.positive?
+      "data/#{entry.fetch('category')}/#{record_set.name}.csv" if count.positive?
     end
 
     def expected_csv_record_set_metadata(record_set)
@@ -260,7 +260,7 @@ module ExportKit
       count = entry.fetch("record_sets").fetch(record_set.name)
       return count.zero? unless count.positive?
 
-      path = "data/#{entry.fetch("category")}/#{record_set.name}.csv"
+      path = "data/#{entry.fetch('category')}/#{record_set.name}.csv"
       table = CSV.parse(csv_entry_contents(archive, path), headers: true)
       table.headers == expected_csv_headers(record_set) && table.size == count
     end

@@ -110,7 +110,7 @@ module ExportKit
         pdf.text "Manifest", size: 16, style: :bold
         pdf.move_down 8
         manifest.each do |entry|
-          pdf.text "#{printable(entry.fetch("label"))}: #{entry.fetch("count")}", size: 9
+          pdf.text "#{printable(entry.fetch('label'))}: #{entry.fetch('count')}", size: 9
         end
       end
 
@@ -120,7 +120,7 @@ module ExportKit
 
       def printable(value)
         value.to_s.encode("UTF-8", invalid: :replace, undef: :replace, replace: "�")
-          .gsub(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/, " ")
+             .gsub(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/, " ")
       end
     end
   end

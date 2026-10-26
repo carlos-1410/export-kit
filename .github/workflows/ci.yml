@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: .tool-versions
+          bundler-cache: true
+
+      - name: Lint code for consistent style
+        run: bundle exec rubocop
+
+  test:
+    name: test (ruby ${{ matrix.ruby }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby: ["3.4", "3.5"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: ${{ matrix.ruby }}
+          bundler-cache: true
+
+      - name: Run tests
+        run: bundle exec rake test
+
+  package:
+    name: package
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: .tool-versions
+          bundler-cache: true
+
+      - name: Build and inspect the gem
+        run: |
+          mkdir -p pkg /tmp/export-kit-unpacked
+          version="$(bundle exec ruby -Ilib -rexport_kit/version -e 'print ExportKit::VERSION')"
+          gem build export_kit.gemspec --output "pkg/export_kit-${version}.gem"
+          gem unpack "pkg/export_kit-${version}.gem" --target /tmp/export-kit-unpacked
+          test -f "/tmp/export-kit-unpacked/export_kit-${version}/lib/export_kit.rb"
+          test -f "/tmp/export-kit-unpacked/export_kit-${version}/README.md"
+          test -f "/tmp/export-kit-unpacked/export_kit-${version}/LICENSE.txt"
+          test ! -e "/tmp/export-kit-unpacked/export_kit-${version}/test"
+
+  audit:
+    name: audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: .tool-versions
+          bundler-cache: true
+
+      - name: Scan dependencies against current advisories
+        run: bundle exec bundler-audit check --update
+
+  required:
+    name: required
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: always()
+    needs: [lint, test, package, audit]
+
+    steps:
+      - name: Require every blocking job to succeed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          count=0
+          for result in $RESULTS; do
+            count=$((count + 1))
+            if [ "$result" != "success" ]; then
+              printf 'Blocking job result: %s\n' "$result" >&2
+              exit 1
+            fi
+          done
+          if [ "$count" -ne 4 ]; then
+            printf 'Expected 4 blocking results, received %s\n' "$count" >&2
+            exit 1
+          fi

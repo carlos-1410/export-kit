@@ -1,0 +1,40 @@
+name: Release gem
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: Publish to RubyGems.org
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: release
+
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
+        with:
+          ruby-version: .tool-versions
+          bundler-cache: true
+
+      - name: Verify tag and package version
+        run: |
+          version="$(bundle exec ruby -Ilib -rexport_kit/version -e 'print ExportKit::VERSION')"
+          test "v${version}" = "${GITHUB_REF_NAME}"
+          bundle exec rake test
+          bundle exec rubocop
+
+      - name: Publish gem with trusted publishing
+        uses: rubygems/release-gem@7f9650160c1a4e7989fdc9855807bdbd421d8b6b # v1.4.1

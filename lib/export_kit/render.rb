@@ -99,7 +99,7 @@ module ExportKit
                        when "json" then Renderers::Json.new
                        when "csv_zip" then Renderers::CsvArchive.new
                        when "pdf" then Renderers::Pdf.new(fonts:)
-      end
+                       end
       implementation.render(document: data, output:, max_bytes:)
     end
 

@@ -88,7 +88,7 @@ module ExportKit
 
       def validate!
         duplicates = allowed & denied.keys
-        raise ArgumentError, "Fields cannot be both exported and omitted: #{duplicates.join(", ")}" if duplicates.any?
+        raise ArgumentError, "Fields cannot be both exported and omitted: #{duplicates.join(', ')}" if duplicates.any?
         raise ArgumentError, "Export fields must be unique" unless allowed.uniq == allowed
       end
     end

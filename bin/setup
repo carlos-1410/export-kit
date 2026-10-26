@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require "fileutils"
+
+root = File.expand_path("..", __dir__)
+Dir.chdir(root) do
+  system("bundle", "check") || system("bundle", "install") || abort("bundle install failed")
+  system("bundle", "exec", "rake", "test") || abort("tests failed")
+end

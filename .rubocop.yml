@@ -1,15 +1,39 @@
-inherit_from: ../../.rubocop.yml
+AllCops:
+  TargetRubyVersion: 3.4
+  NewCops: enable
+  SuggestExtensions: false
 
-Rails:
-  Enabled: false
+Layout/LineLength:
+  Max: 120
 
 Metrics/AbcSize:
+  Max: 25
+  Exclude:
+    - test/**/*
+
+Metrics/ClassLength:
+  Max: 250
   Exclude:
     - test/**/*
 
 Metrics/MethodLength:
+  Max: 20
   Exclude:
     - test/**/*
 
 Metrics/ParameterLists:
   CountKeywordArgs: false
+
+Style/Documentation:
+  Enabled: false
+
+Style/StringLiterals:
+  EnforcedStyle: double_quotes
+
+Style/SymbolProc:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    "%w": "()"
+    "%i": "()"
