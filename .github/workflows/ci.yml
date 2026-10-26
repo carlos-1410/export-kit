@@ -41,7 +41,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ["3.4", "3.5"]
+        # Ruby 3.4 is the declared floor and the newest stable Ruby until 3.5 is released.
+        ruby: ["3.4"]
 
     steps:
       - name: Checkout code
