@@ -8,7 +8,7 @@ require "timeout"
 
 class CoreTest < Minitest::Test
   def test_version_is_exposed
-    assert_equal "0.1.0", ExportKit::VERSION
+    assert_equal "0.1.1", ExportKit::VERSION
   end
 
   def test_nested_json_without_rails
@@ -35,6 +35,20 @@ class CoreTest < Minitest::Test
   ensure
     json&.cleanup
     csv&.cleanup
+  end
+
+  def test_csv_neutralizes_formula_prefixes_hidden_by_spreadsheet_whitespace
+    values = [
+      "=2+2", "+2+2", "-2+2", "@SUM(1,1)",
+      "\t=2+2", "\r=2+2", "\n=2+2", " \t=2+2"
+    ]
+    table = ExportKit::Table.new(columns: [:value], rows: values.map { { value: it } })
+    artifact = ExportKit.render(table, format: :csv, max_bytes: 4096).value!
+
+    assert_equal values.map { ["'#{it}"] }, CSV.parse(artifact.file.read).drop(1)
+    refute_predicate ExportKit::Renderers::CsvArchive.csv_value(" ordinary text"), :start_with?, "'"
+  ensure
+    artifact&.cleanup
   end
 
   def test_result_composition

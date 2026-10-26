@@ -10,7 +10,7 @@ module ExportKit
     # renderer writes one UTF-8 CSV per non-empty record set plus a deterministic manifest.csv.
     class CsvArchive < Base
       MANIFEST_COLUMNS = %w(kind section record_set file count metadata).freeze
-      FORMULA_PREFIX = /\A[=+\-@]/
+      FORMULA_PREFIX = /\A[[:space:]]*[=+\-@]/
 
       def self.csv_value(value)
         rendered = value.is_a?(Array) ? JSON.generate(value) : value
